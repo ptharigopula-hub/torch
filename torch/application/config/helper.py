@@ -5,6 +5,13 @@ import sys
 from enum import Enum
 from distutils.dir_util import copy_tree
 
+log = logging.getLogger(__name__)
+
+class context(dict):
+    __getattr__ = dict.get
+    __setattr__ = dict.__setitem__
+    __delattr__ = dict.__delitem__
+
 class LIFECYCLE_ACTIONS(Enum):
     DEPLOY = 'deploy'
     TEARDOWN = 'teardown'
@@ -88,12 +95,25 @@ class BuildMetaData():
     def set_execution_dir(self):
         os.chdir(self.current_build_folder)
 
-def set_context_for_build():
+    def set_desired_build(self, build):
+        if build:
+            self.current_build = build
+            self.current_build_folder = os.path.normpath(os.path.join(self.builds_folder, str(self.current_build)))
+
+def set_context_for_build(action, build):
+    print('helper')
+    build_context = context({})
+    build_context.action = action
     build_meta_data = BuildMetaData()
     build_meta_data.set_folders_for_build()
-    build_meta_data.set_current_build()
-    build_meta_data.set_current_build_platform()
+    if build_context.action == LIFECYCLE_ACTIONS.DEPLOY.value:
+        build_meta_data.set_current_build()
+        build_meta_data.set_current_build_platform()
+    elif build_context.action == LIFECYCLE_ACTIONS.TEARDOWN.value or build_context.action == LIFECYCLE_ACTIONS.RELEASE.value:
+        build_meta_data.set_desired_build(build)
     build_meta_data.set_execution_dir()
+    
+    return build_context
 
 def build_acid(*args, **kwargs):
     # Build ACID

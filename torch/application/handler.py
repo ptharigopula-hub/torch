@@ -1,18 +1,21 @@
 from .actions import Processor
 from .config import helper
 from .config.helper import LIFECYCLE_ACTIONS
+from .config.helper import context
 
-def handle_action(action, *args, **kwargs):
+def handle_action(action, build, *args, **kwargs):
+    print('coming')
     process_handler = Processor()
-    context = {}
-    context['lifecycle'] = False
-    context['action'] = action
+    pre_context = context({})
+    lifecycle = False
     for lc_action in LIFECYCLE_ACTIONS:
-        if context['action'] == lc_action.value:
-            context['lifecycle'] = True
+        if action == lc_action.value:
+            lifecycle = True
     
-    if context['lifecycle']:
-        helper.set_context_for_build()
-    
-    process_handler.process_action(context, *args, **kwargs)
+    if lifecycle:
+        pre_context = helper.set_context_for_build(action, build)
+    else:
+        pre_context.action = action
+    print('pre_context' ,pre_context)
+    process_handler.process_action(pre_context, *args, **kwargs)
     

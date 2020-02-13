@@ -20,7 +20,7 @@ class Processor():
     #     return action_wrapper
 
     def process_action(self, context, *args, **kwargs):
-        self.action = context['action']
+        self.action = context.action
         self.logger.info('Processing action: {}'.format(self.action))
         if self.action == LIFECYCLE_ACTIONS.DEPLOY.value:
             self.process_lifecycle_deploy(context, *args, **kwargs)
