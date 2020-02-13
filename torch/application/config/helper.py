@@ -3,6 +3,7 @@ import subprocess
 import logging
 import sys
 from enum import Enum
+from distutils.dir_util import copy_tree
 
 class LIFECYCLE_ACTIONS(Enum):
     DEPLOY = 'deploy'
@@ -76,10 +77,23 @@ class BuildMetaData():
             self.logger.error('Issue while creating the current build folder : {}'.format(e))
             sys.exit(1)
 
+    def set_current_build_platform(self):
+        try:
+            if os.path.exists(self.current_build_folder):
+                copy_tree(self.platform_folder, self.current_build_folder)
+        except Exception as e:
+            self.logger.error('Issue while setting platform for current build - {}'.format(e))
+            sys.exit(1)
+
+    def set_execution_dir(self):
+        os.chdir(self.current_build_folder)
+
 def set_context_for_build():
     build_meta_data = BuildMetaData()
     build_meta_data.set_folders_for_build()
     build_meta_data.set_current_build()
+    build_meta_data.set_current_build_platform()
+    build_meta_data.set_execution_dir()
 
 def build_acid(*args, **kwargs):
     # Build ACID
