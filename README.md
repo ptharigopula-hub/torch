@@ -10,6 +10,13 @@ torch help
 #### deployment of infra + app
 ```
 torch deploy
+torch deploy --mode local
+torch deploy --mode pipeline
+```
+
+#### release latest version - future scope
+```
+torch release
 ```
 
 #### teardown of infra + app
